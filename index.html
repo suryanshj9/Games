@@ -26,6 +26,7 @@ h1 {
     font-size: 2em;
     margin: 20px;
     color: #ffd700;
+    transition: transform 0.2s;
 }
 #score {
     margin: 10px;
@@ -65,38 +66,61 @@ button {
 <body>
 
 <div class="container">
-    <h1>✨ Echo Chain: Words ✨</h1>
+<h1>✨ Echo Chain: Smarter Edition ✨</h1>
 
-    <div id="instructions">
-        Press <strong>Start</strong> (or Enter key on desktop) to begin. <br>
-        Type a word that logically follows the displayed word and press <strong>Enter</strong> to submit. <br>
-        You have <strong>3 seconds</strong> each turn. Keep the chain going as long as you can!
-    </div>
-
-    <div id="score">Score: 0</div>
-    <div id="word">Press Start</div>
-
-    <input id="input" placeholder="Your word" disabled autocomplete="off" />
-    <br>
-    <button id="startBtn" onclick="startGame()">Start Game</button>
-
-    <div id="message"></div>
+<div id="instructions">
+    Press <strong>Start</strong> (or Enter key) to begin.<br>
+    Type a word that logically follows the displayed word and press <strong>Enter</strong>.<br>
+    You have <strong>3 seconds</strong> each turn. How long can your chain go?
 </div>
+
+<div id="score">Score: 0</div>
+<div id="word">Press Start</div>
+
+<input id="input" placeholder="Your word" disabled autocomplete="off" />
+<br>
+<button id="startBtn" onclick="startGame()">Start Game</button>
+
+<div id="message"></div>
+</div>
+
+<audio id="success-sound" src="https://assets.mixkit.co/sfx/download/mixkit-correct-answer-reward-952.wav"></audio>
+<audio id="fail-sound" src="https://assets.mixkit.co/sfx/download/mixkit-wrong-answer-fail-notification-946.wav"></audio>
 
 <script>
 let currentWord = '';
 let score = 0;
 let timeout;
-const words = ["Sky", "Tree", "River", "Fire", "Mountain", "Sun", "Moon", "Cloud", "Ocean", "Flower"];
 const wordEl = document.getElementById('word');
 const inputEl = document.getElementById('input');
 const scoreEl = document.getElementById('score');
 const messageEl = document.getElementById('message');
 const startBtn = document.getElementById('startBtn');
+const successSound = document.getElementById('success-sound');
+const failSound = document.getElementById('fail-sound');
 
-function randomWord() {
-    return words[Math.floor(Math.random() * words.length)];
-}
+const wordPairs = {
+    Sky: "Cloud",
+    Cloud: "Rain",
+    Rain: "River",
+    River: "Ocean",
+    Ocean: "Wave",
+    Wave: "Sand",
+    Sand: "Desert",
+    Sun: "Heat",
+    Heat: "Fire",
+    Fire: "Smoke",
+    Smoke: "Ash",
+    Tree: "Leaf",
+    Leaf: "Wind",
+    Wind: "Storm",
+    Storm: "Thunder",
+    Thunder: "Lightning",
+    Flower: "Petal",
+    Petal: "Bee",
+    Bee: "Honey",
+    Honey: "Sweet"
+};
 
 function startGame() {
     score = 0;
@@ -109,8 +133,17 @@ function startGame() {
 
 function nextWord() {
     clearTimeout(timeout);
-    currentWord = randomWord();
+
+    if (!currentWord) {
+        currentWord = randomKey(wordPairs);
+    } else {
+        currentWord = wordPairs[currentWord] || randomKey(wordPairs);
+    }
+
     wordEl.innerText = currentWord;
+    wordEl.style.transform = "scale(1.2)";
+    setTimeout(() => wordEl.style.transform = "scale(1)", 100);
+
     inputEl.value = '';
     inputEl.focus();
     timeout = setTimeout(gameOver, 3000);
@@ -124,10 +157,13 @@ function checkAnswer() {
 
     clearTimeout(timeout);
     const userWord = inputEl.value.trim();
-    if (userWord.length === 0 || userWord.toLowerCase() === currentWord.toLowerCase()) {
+
+    if (userWord.toLowerCase() !== (wordPairs[currentWord] || "").toLowerCase()) {
         gameOver();
         return;
     }
+
+    successSound.play();
     score++;
     scoreEl.innerText = 'Score: ' + score;
     nextWord();
@@ -136,9 +172,11 @@ function checkAnswer() {
 function gameOver() {
     clearTimeout(timeout);
     wordEl.innerText = 'Game Over!';
+    failSound.play();
     messageEl.innerText = `🎉 Final Score: ${score} — Press Start or Enter to play again!`;
     inputEl.disabled = true;
     startBtn.style.display = 'inline-block';
+    currentWord = '';
 }
 
 document.addEventListener('keydown', function(e) {
@@ -150,6 +188,11 @@ document.addEventListener('keydown', function(e) {
         }
     }
 });
+
+function randomKey(obj) {
+    const keys = Object.keys(obj);
+    return keys[Math.floor(Math.random() * keys.length)];
+}
 </script>
 
 </body>
