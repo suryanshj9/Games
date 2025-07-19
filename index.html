@@ -2,75 +2,86 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Echo Chain: Words</title>
 <style>
 body {
-    font-family: Arial, sans-serif; 
-    text-align: center; 
-    margin-top: 50px; 
-    background: linear-gradient(135deg, #89f7fe, #66a6ff); 
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 20px;
+    background: linear-gradient(135deg, #89f7fe, #66a6ff);
     color: #fff;
 }
+.container {
+    max-width: 400px;
+    margin: auto;
+}
 h1 {
-    font-size: 2.5em;
+    font-size: 2em;
     margin-bottom: 10px;
-    text-shadow: 2px 2px #333;
+    text-shadow: 1px 1px #333;
 }
 #word {
-    font-size: 2.5em; 
-    margin: 20px; 
+    font-size: 2em;
+    margin: 20px;
     color: #ffd700;
 }
 #score {
-    margin: 20px;
+    margin: 10px;
     font-size: 1.2em;
 }
 #instructions {
-    margin: 20px auto;
-    max-width: 400px;
-    font-size: 1em;
+    margin: 10px auto;
+    font-size: 0.95em;
     background: rgba(0,0,0,0.2);
     padding: 10px;
     border-radius: 8px;
 }
 input {
-    font-size: 1em; 
-    padding: 8px; 
-    width: 200px;
+    font-size: 1em;
+    padding: 8px;
+    width: 80%;
+    max-width: 250px;
     border-radius: 5px;
     border: none;
 }
 button {
-    padding: 10px 20px; 
-    margin-top: 10px; 
-    font-size: 1em; 
-    cursor: pointer; 
-    background-color: #fff; 
-    color: #333; 
-    border: none; 
+    padding: 10px 20px;
+    margin: 15px;
+    font-size: 1em;
+    cursor: pointer;
+    background-color: #fff;
+    color: #333;
+    border: none;
     border-radius: 5px;
 }
 #message {
-    margin-top: 20px; 
-    font-size: 1.3em;
+    margin-top: 20px;
+    font-size: 1.1em;
 }
 </style>
 </head>
 <body>
 
-<h1>✨ Echo Chain: Words ✨</h1>
+<div class="container">
+    <h1>✨ Echo Chain: Words ✨</h1>
 
-<div id="instructions">
-    Press <strong>Enter</strong> to start.  
-    Type a word that logically follows the displayed word and press <strong>Enter</strong> to submit.  
-    You have <strong>3 seconds</strong> each turn.  
-    Keep the chain going as long as you can!
+    <div id="instructions">
+        Press <strong>Start</strong> (or Enter key on desktop) to begin. <br>
+        Type a word that logically follows the displayed word and press <strong>Enter</strong> to submit. <br>
+        You have <strong>3 seconds</strong> each turn. Keep the chain going as long as you can!
+    </div>
+
+    <div id="score">Score: 0</div>
+    <div id="word">Press Start</div>
+
+    <input id="input" placeholder="Your word" disabled autocomplete="off" />
+    <br>
+    <button id="startBtn" onclick="startGame()">Start Game</button>
+
+    <div id="message"></div>
 </div>
-
-<div id="score">Score: 0</div>
-<div id="word">Press Enter to Start</div>
-<input id="input" placeholder="Your word" disabled autocomplete="off" />
-<div id="message"></div>
 
 <script>
 let currentWord = '';
@@ -81,6 +92,7 @@ const wordEl = document.getElementById('word');
 const inputEl = document.getElementById('input');
 const scoreEl = document.getElementById('score');
 const messageEl = document.getElementById('message');
+const startBtn = document.getElementById('startBtn');
 
 function randomWord() {
     return words[Math.floor(Math.random() * words.length)];
@@ -90,6 +102,7 @@ function startGame() {
     score = 0;
     messageEl.innerText = '';
     inputEl.disabled = false;
+    startBtn.style.display = 'none';
     scoreEl.innerText = 'Score: 0';
     nextWord();
 }
@@ -123,13 +136,18 @@ function checkAnswer() {
 function gameOver() {
     clearTimeout(timeout);
     wordEl.innerText = 'Game Over!';
-    messageEl.innerText = '🎉 Final Score: ' + score + ' — Press Enter to play again!';
+    messageEl.innerText = `🎉 Final Score: ${score} — Press Start or Enter to play again!`;
     inputEl.disabled = true;
+    startBtn.style.display = 'inline-block';
 }
 
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
-        checkAnswer();
+        if (inputEl.disabled) {
+            startGame();
+        } else {
+            checkAnswer();
+        }
     }
 });
 </script>
